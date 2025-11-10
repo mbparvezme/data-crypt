@@ -1,0 +1,39 @@
+{
+  "name": "data-cryp",
+  "version": "1.0.0-alpha-1",
+  "description": "A lightweight and powerful encryption library for Node.js and browser. It allows you to encrypt and decrypt text or files using a password.",
+
+  "main": "dist/data-cryp.cjs.js",
+  "module": "dist/data-cryp.esm.js",
+  "browser": "dist/data-cryp.min.js",
+  "exports": {
+    "import": "./dist/data-cryp.esm.js",
+    "require": "./dist/data-cryp.cjs.js"
+  },
+
+  "homepage": "https://github.com/mbparvezme/data-cryp#readme",
+  "bugs": {
+    "url": "https://github.com/mbparvezme/data-cryp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbparvezme/data-cryp.git"
+  },
+  "license": "MIT",
+  "author": "M B Parvez",
+  "type": "module",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "test": "node test/data-cryp.test.js"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "rollup": "^4.53.2",
+    "rollup-plugin-terser": "^7.0.2"
+  },
+  "keywords": ["aes", "encryption", "crypto", "pbkdf2", "aes-gcm", "browser", "nodejs"]
+}
