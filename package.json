@@ -1,5 +1,5 @@
 {
-  "name": "data-cryp",
+  "name": "data-crypt",
   "version": "1.0.0-alpha-1",
   "description": "A lightweight and powerful encryption library for Node.js and browser. It allows you to encrypt and decrypt text or files using a password.",
 
@@ -32,8 +32,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
-    "rollup": "^4.53.2",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup": "^4.53.2"
   },
   "keywords": ["aes", "encryption", "crypto", "pbkdf2", "aes-gcm", "browser", "nodejs"]
 }

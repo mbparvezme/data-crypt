@@ -1,11 +1,10 @@
-// src/secure-crypto.js
 const isNode = typeof window === 'undefined';
 const { subtle, getRandomValues } = isNode ? require('crypto').webcrypto : crypto;
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
-export class SecureCrypto {
+export class DataCrypt {
   static async deriveKey(password, salt, {
     iterations = 100000,
     hash = 'SHA-256',
