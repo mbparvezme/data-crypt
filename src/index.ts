@@ -1,5 +1,17 @@
-const isNode = typeof window === 'undefined';
-const { subtle, getRandomValues } = isNode ? require('crypto').webcrypto : crypto;
+const isNode = typeof window === "undefined";
+
+let subtle: SubtleCrypto;
+let getRandomValues: (array: Uint8Array) => Uint8Array;
+
+if (isNode) {
+  // dynamic import for ESM
+  const { webcrypto } = await import("crypto");
+  subtle = webcrypto.subtle as unknown as SubtleCrypto;
+  getRandomValues = webcrypto.getRandomValues.bind(webcrypto) as (array: Uint8Array) => Uint8Array;
+} else {
+  subtle = crypto.subtle;
+  getRandomValues = crypto.getRandomValues.bind(crypto);
+}
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -29,7 +41,7 @@ export class DataCrypt {
     );
 
     return subtle.deriveKey(
-      { name: 'PBKDF2', salt, iterations, hash },
+      { name: 'PBKDF2', salt: salt as any, iterations, hash },
       keyMaterial,
       { name: 'AES-GCM', length },
       false,
@@ -47,7 +59,7 @@ export class DataCrypt {
     const key = await this.deriveKey(password, salt, opts);
 
     const data = typeof text === 'string' ? enc.encode(text) : text;
-    const encrypted = await subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
+    const encrypted = await subtle.encrypt({ name: 'AES-GCM', iv: iv as BufferSource }, key, new Uint8Array(data));
 
     const buffer = new Uint8Array(encrypted);
     const combined = new Uint8Array(salt.length + iv.length + buffer.length);
