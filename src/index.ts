@@ -4,12 +4,22 @@ const { subtle, getRandomValues } = isNode ? require('crypto').webcrypto : crypt
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
+export interface DeriveOptions {
+  iterations?: number;
+  hash?: string;
+  length?: number;
+}
+
 export class DataCrypt {
-  static async deriveKey(password, salt, {
-    iterations = 100000,
-    hash = 'SHA-256',
-    length = 256
-  } = {}) {
+  static async deriveKey(
+    password: string,
+    salt: Uint8Array,
+    {
+      iterations = 100000,
+      hash = 'SHA-256',
+      length = 256
+    }: DeriveOptions = {}
+  ): Promise<CryptoKey> {
     const keyMaterial = await subtle.importKey(
       'raw',
       enc.encode(password),
@@ -27,7 +37,11 @@ export class DataCrypt {
     );
   }
 
-  static async encrypt(text, password, opts = {}) {
+  static async encrypt(
+    text: string | Uint8Array,
+    password: string,
+    opts: DeriveOptions = {}
+  ): Promise<string> {
     const salt = getRandomValues(new Uint8Array(16));
     const iv = getRandomValues(new Uint8Array(12));
     const key = await this.deriveKey(password, salt, opts);
@@ -44,7 +58,11 @@ export class DataCrypt {
     return Buffer.from(combined).toString('base64');
   }
 
-  static async decrypt(base64, password, opts = {}) {
+  static async decrypt(
+    base64: string,
+    password: string,
+    opts: DeriveOptions = {}
+  ): Promise<string | null> {
     try {
       const combined = new Uint8Array(Buffer.from(base64, 'base64'));
       const salt = combined.slice(0, 16);
@@ -60,13 +78,19 @@ export class DataCrypt {
     }
   }
 
-  // Encrypt file (Buffer or Uint8Array)
-  static async encryptFile(fileData, password, opts = {}) {
+  static async encryptFile(
+    fileData: Uint8Array,
+    password: string,
+    opts: DeriveOptions = {}
+  ): Promise<string> {
     return await this.encrypt(fileData, password, opts);
   }
 
-  // Decrypt file → returns Uint8Array
-  static async decryptFile(base64, password, opts = {}) {
+  static async decryptFile(
+    base64: string,
+    password: string,
+    opts: DeriveOptions = {}
+  ): Promise<Uint8Array> {
     const combined = new Uint8Array(Buffer.from(base64, 'base64'));
     const salt = combined.slice(0, 16);
     const iv = combined.slice(16, 28);
