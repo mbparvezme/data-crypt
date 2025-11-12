@@ -23,6 +23,10 @@
   ],
   "scripts": {
     "build": "tsc && node src/lib/setup-cli.js",
+
+    "build:docs": "cp README.md docs/ && npm run build",
+    "deploy:docs": "cp README.md docs/ && git add docs/README.md && git commit -m 'Update docs' && git push",
+
     "test": "ts-node-esm test/index.test.ts",
     "prepublishOnly": "npm run build",
     "clean": "rm -rf dist",
