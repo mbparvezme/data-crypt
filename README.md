@@ -1,12 +1,13 @@
 # 🔐 Data-Cryp
 
-A robust, cross-platform TypeScript/JavaScript library for encrypting and decrypting data and files using AES-GCM with PBKDF2 key derivation. Works seamlessly in both Node.js and browser environments.
+A robust, cross-platform TypeScript/JavaScript library for encrypting and decrypting data and files using AES-GCM with PBKDF2 key derivation. Works seamlessly in both Node.js and browser environments with built-in CLI support.
 
 <br>
 
 ## 🚀 Features
 
 * Secure Encryption: AES-GCM with PBKDF2 key derivation
+* Built-in CLI support
 * Cross-Platform: Works in Node.js and browsers
 * Zero Dependencies: Uses native Web Crypto API
 * Type Safe: Written in TypeScript with full type definitions
