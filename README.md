@@ -9,16 +9,15 @@ A robust, cross-platform TypeScript/JavaScript library for encrypting and decryp
 - [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-  - [Encrypt and Decrypt Text](#encrypt-and-decrypt-text)
-  - [CLI Usage](#cli-usage)
-    - [CLI Installation](#cli-installation)
-    - [Help](#help)
-    - [Available Commands](#available-commands)
-    - [Basic CLI Text Operations](#basic-cli-text-operations)
-    - [CLI File Operations](#cli-file-operations)
-    - [Advanced CLI Options](#advanced-cli-options)
-    - [Examples with Advanced Options](#examples-with-advanced-options)
-    - [Piping Support](#piping-support)
+- [CLI Usage](#cli-usage)
+  - [CLI Installation](#cli-installation)
+  - [Help](#help)
+  - [Available Commands](#available-commands)
+  - [Basic CLI Text Operations](#basic-cli-text-operations)
+  - [CLI File Operations](#cli-file-operations)
+  - [Advanced CLI Options](#advanced-cli-options)
+  - [Examples with Advanced Options](#examples-with-advanced-options)
+  - [Piping Support](#piping-support)
 - [API Reference](#api-reference)
 - [Custom Options](#custom-options)
 - [Usage](#usage)
@@ -67,9 +66,8 @@ yarn add data-crypt
 
 ## Quick Start
 
-###  Encrypt and Decrypt Text
-
 ```js
+// Import DataCrypt
 import { DataCrypt } from 'data-crypt';
 
 // Encrypt a string
