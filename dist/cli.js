@@ -4,42 +4,69 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { argv, stdin, exit } from 'process';
 function showHelp() {
     console.log(`
-DataCrypt CLI (dc) - Encrypt/Decrypt files and data
+${color('blue', '='.repeat(60))}
+${bold(color('blue', '🔐  DataCrypt CLI (dc) - Encrypt/Decrypt files and data'))}
+${color('blue', '='.repeat(60))}
 
-Usage:
-  dc <command> [options]
+${color('yellow', 'USAGE:')}
+  ${color('green', 'dc')} ${color('white', '<command>')} ${color('gray', '[options]')}
 
-Commands:
-  encrypt <text> <password>    Encrypt text
-  decrypt <encrypted> <password>  Decrypt text
+${color('yellow', 'COMMANDS:')}
+  ${color('green', 'encrypt')} ${color('white', '<text> <password>')}      ${color('gray', '# Encrypt text')}
+  ${color('green', 'decrypt')} ${color('white', '<encrypted> <password>')} ${color('gray', '# Decrypt text')}
 
-Options for file operations:
-  -f, --file <path>          Input file path
-  -o, --output <path>        Output file path
+${color('yellow', 'FILE OPERATIONS:')}
+  ${color('magenta', '-f, --file')} ${color('white', '<path>')}              ${color('gray', '# Input file path')}
+  ${color('magenta', '-o, --output')} ${color('white', '<path>')}            ${color('gray', '# Output file path')}
 
-Advanced options:
-  -i, --iterations <number>  PBKDF2 iterations (default: 600000)
-  --hash <algorithm>         Hash algorithm: SHA-256, SHA-384, SHA-512
-  -l, --length <bits>        Key length: 128, 192, 256
-  -s, --salt-length <bytes>  Salt length in bytes (default: 16)
+${color('yellow', 'ADVANCED OPTIONS:')}
+  ${color('magenta', '-i, --iterations')} ${color('white', '<number>')}      ${color('gray', '# PBKDF2 iterations')} ${color('gray', '(default: 600,000)')}
+  ${color('magenta', '--hash')} ${color('white', '<algorithm>')}             ${color('gray', '# Hash algorithm:')} ${color('cyan', 'SHA-256, SHA-384, SHA-512')}
+  ${color('magenta', '-l, --length')} ${color('white', '<bits>')}            ${color('gray', '# Key length:')} ${color('cyan', '128, 192, 256')}
+  ${color('magenta', '-s, --salt-length')} ${color('white', '<bytes>')}      ${color('gray', '# Salt length')} ${color('gray', '(default: 16)')}
 
-General:
-  -h, --help                 Show this help
+${color('yellow', 'GENERAL:')}
+  ${color('magenta', '-h, --help')}                     ${color('gray', '# Show this help message')}
 
-Examples:
-  # Text encryption/decryption
-  dc encrypt "secret text" "password"
-  dc decrypt "ENCRYPTED_BASE64" "password"
+${color('yellow', 'EXAMPLES:')}
+  ${color('gray', '# Text encryption/decryption')}
+  ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('white', '"secret text"')} ${color('magenta', '"password"')}
+  ${color('cyan', '→')} ${color('green', 'dc decrypt')} ${color('white', '"ENCRYPTED_BASE64"')} ${color('magenta', '"password"')}
 
-  # File encryption/decryption
-  dc encrypt -f input.txt -o encrypted.txt "password"
-  dc decrypt -f encrypted.txt -o decrypted.txt "password"
+  ${color('gray', '# File encryption/decryption')}
+  ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('magenta', '-f input.txt -o encrypted.txt')} ${color('white', '"password"')}
+  ${color('cyan', '→')} ${color('green', 'dc decrypt')} ${color('magenta', '-f encrypted.txt -o decrypted.txt')} ${color('white', '"password"')}
 
-  # With advanced options
-  dc encrypt -f document.pdf -o secure.pdf -i 1000000 --hash SHA-512 "password"
-  dc encrypt "text" -i 500000 -l 256 "password"
+  ${color('gray', '# With advanced options')}
+  ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('magenta', '-f document.pdf -o secure.pdf -i 1000000 --hash SHA-512')} ${color('white', '"password"')}
+  ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('white', '"text"')} ${color('magenta', '-i 500000 -l 256')} ${color('white', '"password"')}
+
+${color('gray', '┌' + '─'.repeat(60) + '┐')}
+${color('gray', '│')} ${bold(color('gray', '💎 Tip'))} ${color('gray', '                                                    │')}
+${color('gray', '│')} ${color('gray', 'Use quotes around text/passwords with spaces!')} ${color('gray', '             │')}
+${color('gray', '│')} ${color('gray', 'For more, visit: ')} ${color('white', 'https://github.com/mbparvezme/data-crypt')} ${color('gray', '│')}
+${color('gray', '└' + '─'.repeat(60) + '┘')}
+
+
 `);
 }
+// Color utility function (add this at the top of your file)
+function color(colorName, text) {
+    const colors = {
+        reset: '\x1b[0m',
+        blue: '\x1b[34m',
+        green: '\x1b[32m',
+        yellow: '\x1b[33m',
+        magenta: '\x1b[35m',
+        cyan: '\x1b[36m',
+        white: '\x1b[37m',
+        gray: '\x1b[90m',
+        brightWhite: '\x1b[97m'
+    };
+    const colorCode = colors[colorName] || colors.reset;
+    return `${colorCode}${text}${colors.reset}`;
+}
+const bold = (text) => `\x1b[1m${text}\x1b[0m`;
 function parseArgs() {
     const args = argv.slice(2);
     const options = {
