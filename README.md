@@ -1,122 +1,324 @@
-# 🔐 DataCryp
+# 🔐 Data-Cryp
 
-**DataCryp** is a lightweight and powerful encryption library for **Node.js** and **browser**.
-It allows you to **encrypt and decrypt text or files** using a password — safely and easily.
+A robust, cross-platform TypeScript/JavaScript library for encrypting and decrypting data and files using AES-GCM with PBKDF2 key derivation. Works seamlessly in both Node.js and browser environments.
 
-It uses **AES-GCM** with a derived key from **PBKDF2**, supporting custom iterations, hash, and key length.
-
----
+<br>
 
 ## 🚀 Features
 
-* Works in **both Browser and Node.js**
-* Encrypt and decrypt **text or files**
-* Uses **AES-GCM (256-bit)** encryption
-* Password-based key derivation with **PBKDF2**
-* Customizable:
+* Secure Encryption: AES-GCM with PBKDF2 key derivation
+* Cross-Platform: Works in Node.js and browsers
+* Zero Dependencies: Uses native Web Crypto API
+* Type Safe: Written in TypeScript with full type definitions
+* Configurable: Customizable encryption parameters
+* File Support: Encrypt/decrypt binary file data
+* Simple API: Easy-to-use static methods
 
-  * Iteration count
-  * Hash function (e.g., `SHA-256`, `SHA-512`)
-  * Key length (128, 192, 256 bits)
-* Written in **TypeScript-friendly** modern JavaScript
-
----
+<br>
 
 ## 📦 Installation
 
 ```bash
-npm install data-cryp
+npm install data-crypt
 ```
 
 or
 
 ```bash
-yarn add data-cryp
+yarn add data-crypt
 ```
 
----
+<br>
 
-## 🧠 Basic Usage
+## 🕓 Quick Start
 
-### Encrypt and Decrypt Text
+###  Encrypt and Decrypt Text
 
 ```js
-import { DataCryp } from 'data-cryp';
+import { DataCrypt } from 'data-crypt';
 
-(async () => {
-  const password = 'my-secret-password';
-  const text = 'Hello, DataCryp!';
+// Encrypt a string
+const encrypted = await DataCrypt.encrypt('Secret message', 'my-password');
+console.log('Encrypted:', encrypted);
 
-  // Encrypt text
-  const encrypted = await DataCryp.encrypt(text, password);
-  console.log('Encrypted:', encrypted);
+// Decrypt the data
+const decrypted = await DataCrypt.decrypt(encrypted, 'my-password');
+console.log('Decrypted:', decrypted); // 'Secret message'
+```
+<br>
 
-  // Decrypt text
-  const decrypted = await DataCryp.decrypt(encrypted, password);
-  console.log('Decrypted:', decrypted);
-})();
+## 🔳 CLI Usage
+
+DataCrypt provides a convenient command-line interface for quick encryption/decryption operations.
+
+### CLI Installation
+
+```bash
+npm install -g data-crypt
 ```
 
----
+
+### Help
+
+```bash
+dc --help
+dc -h
+```
+
+### Available Commands
+You can use any of these command names:
+
+- `dc` (recommended, short and fast)
+- `datacrypt` (full name)
+- `data-crypt` (hyphenated)
+
+
+### Basic CLI Text Operations
+
+**Encrypt Text**
+```bash
+dc encrypt "your secret message" "password"
+```
+
+**Decrypt Text**
+```bash
+dc decrypt "ENCRYPTED_BASE64_DATA" "password"
+```
+
+### CLI File Operations
+
+**Encrypt Text**
+```bash
+dc encrypt -f input.txt -o encrypted.txt "password"
+```
+
+**Decrypt Text**
+```bash
+dc decrypt -f encrypted.txt -o decrypted.txt "password"
+```
+
+
+### Advanced CLI Options
+
+| Option	|   Description   |   Example |
+| :------------ | :-------------- | :---------- |
+| -i, --iterations &lt;number&gt; | PBKDF2 iterations | -i 1000000 |
+| --hash &lt;algorithm&gt; | Hash algorithm (SHA-256, SHA-384, SHA-512) | --hash SHA-512 |
+| -l, --length &lt;bits&gt; | Hash algorithm (SHA-256, SHA-384, SHA-512) | --hash SHA-512 |
+| -s, --salt-length &lt;bytes&gt; | Salt length in bytes | -s 32 |
+
+
+### Examples with Advanced Options
+
+```bash
+# Encrypt with custom parameters
+dc encrypt "text" -i 1000000 --hash SHA-512 "password"
+
+# Encrypt file with advanced options
+dc encrypt -f document.pdf -o secure.pdf -i 500000 --hash SHA-384 "password"
+```
+
+### Piping Support
+
+You can also pipe data through the CLI:
+
+```bash
+# Encrypt piped data
+echo "secret data" | dc encrypt "password"
+
+# Encrypt file content
+cat file.txt | dc encrypt -f "password" > encrypted.txt
+```
+
+<br>
+
+##  📄 API Reference
+
+###  ⭐ `encrypt()`: Encrypts text or binary data.
+
+**Syntax**
+```ts
+encrypt(
+  text: string | Uint8Array,
+  password: string,
+  opts?: DeriveOptions
+): Promise<string>
+```
+
+**Parameters**
+- `text`: String or Uint8Array to encrypt
+- `password`: Password for encryption
+- `opts`: [Optional derivation options](#custom-options)
+
+**Returns**: Base64-encoded encrypted data (salt + iv + ciphertext)
+
+**Example**
+```ts
+const encrypted = await DataCrypt.encrypt('Hello World', 'password');
+```
+<br>
+
+### ⭐ `decrypt()`: Decrypts previously encrypted data.
+
+**Syntax**
+```ts
+decrypt(
+  base64: string,
+  password: string,
+  opts?: DeriveOptions
+): Promise<string | null>
+```
+
+**Parameters**
+- `base64`: Base64-encoded encrypted data
+- `password`: Password used for encryption
+- `opts`: [Optional derivation options](#custom-options) (must match encryption options, if used)
+
+**Returns**: Decrypted string or `null` if decryption fails.
+
+**Example**
+```ts
+const decrypted = await DataCrypt.decrypt(encryptedData, 'password');
+```
+<br>
+
+### ⭐ `encryptFile()`: Encrypts binary file data.
+
+**Syntax**
+```ts
+encryptFile(
+  fileData: Uint8Array,
+  password: string,
+  opts?: DeriveOptions
+): Promise<string>
+```
+
+**Parameters**
+- `fileData`: Uint8Array containing file data
+- `password`: Password used for encryption
+- `opts`: [Optional derivation options](#custom-options)
+
+**Returns**: Base64-encoded encrypted file data.
+
+**Example**
+```ts
+const fileData = new TextEncoder().encode('File content');
+const encryptedFile = await DataCrypt.encryptFile(fileData, 'password');
+```
+<br>
+
+### ⭐ `decryptFile()`: Decrypts previously encrypted file data.
+
+**Syntax**
+```ts
+decryptFile(
+  base64: string,
+  password: string,
+  opts?: DeriveOptions
+): Promise<Uint8Array | null>
+```
+
+**Parameters**
+- `fileData`: Uint8Array containing file data
+- `password`: Password used for encryption
+- `opts`: [Optional derivation options](#custom-options) (must match encryption options)
+
+**Returns**: Decrypted Uint8Array or `null` if decryption fails.
+
+**Example**
+```ts
+const decryptedFile = await DataCrypt.decryptFile(encryptedFile, 'password');
+```
+<br>
+
+### ⭐ `isEncryptedData()`: Checks if a string appears to be valid encrypted data.
+
+**Syntax**
+```ts
+isEncryptedData(data: string): boolean
+```
+
+**Example**
+```ts
+const isValid = DataCrypt.isEncryptedData(encryptedData);
+console.log('Is encrypted?', isValid); // true or false
+```
+<br>
+
+### ⭐ `generateRandomBytes()`: Generates cryptographically secure random bytes.
+
+**Syntax**
+```ts
+generateRandomBytes(length: number): Uint8Array
+```
+
+**Example**
+```ts
+const randomBytes = DataCrypt.generateRandomBytes(32);
+```
+<br>
+
+### ⭐ `clearCache(): void`: Clears the derived key cache.
+
+**Syntax**
+```ts
+clearCache(): void
+```
+
+**Example**
+```ts
+DataCrypt.clearCache();
+```
+<br>
+
+### ⭐ `getCacheSize()`: Returns the number of cached keys.
+
+**Syntax**
+```ts
+getCacheSize(): number
+```
+
+**Example**
+```ts
+console.log('Cached keys: ', DataCrypt.getCacheSize());
+```
+<br>
 
 ## ⚙️ Custom Options
 
-You can customize how the encryption key is derived.
+Customize the key derivation process:
 
-| Option       | Default     | Description                                              |
-| :----------- | :---------- | :------------------------------------------------------- |
-| `iterations` | `100000`    | Number of PBKDF2 iterations (more = stronger but slower) |
-| `hash`       | `'SHA-256'` | Hash algorithm for PBKDF2                                |
-| `length`     | `256`       | Key length in bits (128 / 192 / 256)                     |
+| Option        | Type            | Default     | Description                                               |
+| :------------ | :-------------- | :---------- | :-------------------------------------------------------- |
+| `iterations`  | `number`        | `600000`    | Number of PBKDF2 iterations (more = stronger but slower)  |
+| `hash`        | `HashAlgorithm` | `'SHA-256'` | Hash algorithm for PBKDF2                                 |
+| `length`      | `KeyLength`     | `256`       | Key length in bits (128 / 192 / 256)                      |
+| `saltLength`  | `number`        | `16`        | Salt length in bytes (default: 16)                        |
 
-```js
-const encrypted = await DataCryp.encrypt('My Data', 'password123', {
-  iterations: 200000,
-  hash: 'SHA-512',
-  length: 256
-});
+**Interface**
+```ts
+interface DeriveOptions {
+  iterations?: number;
+  hash?: HashAlgorithm;
+  length?: KeyLength;
+  saltLength?: number;
+}
 ```
 
----
+<br>
 
-## 📁 Encrypt and Decrypt Files
+## 🎯 Usage
 
-### Encrypt File (Node.js)
+### 🌐 Browser Usage
 
-```js
-import fs from 'fs';
-import { DataCryp } from 'data-cryp';
+#### With Bundlers (Webpack, Vite, etc.)
 
-(async () => {
-  const fileBuffer = await fs.promises.readFile('example.txt');
-
-  const encryptedFile = await DataCryp.encryptFile(fileBuffer, 'mypassword');
-  await fs.promises.writeFile('example.enc', encryptedFile);
-
-  console.log('File encrypted and saved as example.enc');
-})();
+```ts
+import { DataCrypt } from 'datacrypt';
+// NOw use as normal Javascript
 ```
 
-### Decrypt File (Node.js)
-
-```js
-import fs from 'fs';
-import { DataCryp } from 'data-cryp';
-
-(async () => {
-  const encryptedData = await fs.promises.readFile('example.enc', 'utf8');
-
-  const decryptedFile = await DataCryp.decryptFile(encryptedData, 'mypassword');
-  await fs.promises.writeFile('example-decrypted.txt', decryptedFile);
-
-  console.log('File decrypted and saved as example-decrypted.txt');
-})();
-```
-
----
-
-## 🌐 Browser Usage
-
+#### Direct Script Tag
 You can use the same API in a browser environment.
 
 ```html
@@ -133,37 +335,72 @@ You can use the same API in a browser environment.
 </script>
 ```
 
----
+### 📦 Node.js Usage
 
-## 🧩 API Reference
+#### CommonJS
 
-### `DataCryp.encrypt(text, password, options?)`
+```js
+const { DataCrypt } = require('datacrypt');
 
-Encrypts a string or Uint8Array. Returns a Base64 string.
+async function main() {
+  const encrypted = await DataCrypt.encrypt('Node.js data', 'password');
+  const decrypted = await DataCrypt.decrypt(encrypted, 'password');
+  console.log(decrypted);
+}
 
-### `DataCryp.decrypt(base64, password, options?)`
+main().catch(console.error);
+```
 
-Decrypts Base64 data. Returns a UTF-8 string or `null` if decryption fails.
+#### ES Modules
 
-### `DataCryp.encryptFile(fileData, password, options?)`
+```js
+import { DataCrypt } from 'datacrypt';
+// Use as shown in browser examples
+```
 
-Encrypts binary file data (Buffer or Uint8Array). Returns Base64 string.
+<br>
 
-### `DataCryp.decryptFile(base64, password, options?)`
+## 🔒 Security Considerations
 
-Decrypts Base64 file data. Returns a `Uint8Array`.
 
----
+### Best Practices
+1. **Use Strong Passwords**: The security depends on password strength.
+2. **Increase Iterations**: Use higher PBKDF2 iterations for sensitive data.
+3. **Unique Salts**: Each encryption uses a random salt (automatically handled).
+4. **Secure Storage**: Store encrypted data securely, separate from keys.
 
-## ⚠️ Notes
+### Default Security Parameters
+- **PBKDF2 Iterations**: 600,000 (OWASP recommended minimum)
+- **Hash Algorithm**: SHA-256
+- **Key Length**: 256-bit
+- **Encryption**: AES-GCM with 12-byte IV
+- **Salt Length**: 16 bytes
 
-* Always **use a strong password**.
-* The encrypted output includes the **salt**, **IV**, and **ciphertext**, so everything needed for decryption is inside.
-* Each encryption call generates a new random salt and IV.
-* You can safely store or transmit the Base64 result.
+### Performance
+The library is optimized for performance with:
 
----
+- **Key Caching**: Derived keys are cached for same parameters
+- **Native Crypto**: Uses platform's native Web Crypto API
+- **Efficient Encoding**: Minimal data copying and encoding
 
-## 🧑‍💻 License
+For large files, consider streaming encryption in chunks (not currently supported).
 
-MIT © 2025 [Your Name or Org]
+### Limitations
+- **Password Strength**: Security depends entirely on password strength
+- **No Key Management**: This library doesn't handle key storage/management
+- **Memory**: Large files are loaded entirely into memory
+
+<br>
+
+## 💁‍♂️ Contributing
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+
+
+## 🛡️ License
+
+MIT © 2025 [[M B Parvez](https://www.mbparvez.me)]

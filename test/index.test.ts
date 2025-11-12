@@ -4,7 +4,7 @@ async function runTests() {
   const password = "test-password";
   const text = "Hello DataCrypt! 🔐";
 
-  console.log("Main text: ", text, "\n\n");
+  console.log("\nMain text: ", text, "\n\n");
 
   console.log("🧩 Testing text encryption/decryption...");
   const encrypted = await DataCrypt.encrypt(text, password);
@@ -23,7 +23,6 @@ async function runTests() {
   console.log("Decrypted:", decryptedCustom);
     console.log(decrypted === text ? "✅ Text test (custom) Passed." : "❌ Text test (custom) failed!");
   console.log("✅ Text test (custom):", decryptedCustom === text);
-
 
   console.log("\n\n🧩 Testing file encryption/decryption...");
   const fileData = new TextEncoder().encode("File encryption example");

@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "A lightweight and powerful encryption library for Node.js and browser. It allows you to encrypt and decrypt text or files using a password.",
   "type": "module",
+  "bin": {
+    "datacrypt": "./dist/cli.js",
+    "data-crypt": "./dist/cli.js",
+    "dc": "./dist/cli.js"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -17,10 +22,11 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node src/lib/setup-cli.js",
     "test": "ts-node-esm test/index.test.ts",
     "prepublishOnly": "npm run build",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "dev:cli": "node --loader tsx src/cli.ts"
   },
   "repository": {
     "type": "git",
