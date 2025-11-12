@@ -1,0 +1,21 @@
+name: Deploy Docs
+on:
+  push:
+    branches: [main]
+    paths: ['README.md']
+  pull_request:
+    branches: [main]
+    paths: ['README.md']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Copy README to docs
+        run: cp README.md docs/README.md
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.SITE_PUBLISH_GITHUB }}
+          publish_dir: ./docs
