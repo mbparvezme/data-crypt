@@ -6,39 +6,39 @@ A robust, cross-platform TypeScript/JavaScript library for encrypting and decryp
 
 ## Table of Contents
 
-- [Features](#-features)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-  - [Encrypt and Decrypt Text](#-encrypt-and-decrypt-text)
-  - [CLI Usage](#-cli-usage)
-    - [CLI Installation](#-cli-installation)
-    - [Help](#-help)
-    - [Available Commands](#-available-commands)
-    - [Basic CLI Text Operations](#-basic-cli-text-operations)
-    - [CLI File Operations](#-cli-file-operations)
-    - [Advanced CLI Options](#-advanced-cli-options)
-    - [Examples with Advanced Options](#-examples-with-advanced-options)
-    - [Piping Support](#-piping-support)
-- [API Reference](#-api-reference)
-- [Custom Options](#-custom-options)
-- [Usage](#-usage)
-  - [Browser Usage](#-browser-usage)
-    - [With Bundlers (Webpack, Vite, etc.)](#-with-bundlers-webpack-vite-etc)
-    - [Direct Script Tag](#-direct-script-tag)
-  - [Node.js Usage](#-nodejs-usage)
-    - [CommonJS](#-commonjs)
-    - [ES Modules](#-es-modules)
-- [Security Considerations](#-security-considerations)
-  - [Best Practices](#-best-practices)
-  - [Default Security Parameters](#-default-security-parameters)
-  - [Performance](#-performance)
-  - [Limitations](#-limitations)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+  - [Encrypt and Decrypt Text](#encrypt-and-decrypt-text)
+  - [CLI Usage](#cli-usage)
+    - [CLI Installation](#cli-installation)
+    - [Help](#help)
+    - [Available Commands](#available-commands)
+    - [Basic CLI Text Operations](#basic-cli-text-operations)
+    - [CLI File Operations](#cli-file-operations)
+    - [Advanced CLI Options](#advanced-cli-options)
+    - [Examples with Advanced Options](#examples-with-advanced-options)
+    - [Piping Support](#piping-support)
+- [API Reference](#api-reference)
+- [Custom Options](#custom-options)
+- [Usage](#usage)
+  - [Browser Usage](#browser-usage)
+    - [With Bundlers (Webpack, Vite, etc.)](#with-bundlers-webpack-vite-etc)
+    - [Direct Script Tag](#direct-script-tag)
+  - [Node.js Usage](#nodejs-usage)
+    - [CommonJS](#commonjs)
+    - [ES Modules](#es-modules)
+- [Security Considerations](#security-considerations)
+  - [Best Practices](#best-practices)
+  - [Default Security Parameters](#default-security-parameters)
+  - [Performance](#performance)
+  - [Limitations](#limitations)
+- [Contributing](#contributing)
+- [License](#license)
 
 <br>
 
-## 🚀 Features
+## Features
 
 * Secure Encryption: AES-GCM with PBKDF2 key derivation
 * Built-in CLI support
@@ -51,7 +51,7 @@ A robust, cross-platform TypeScript/JavaScript library for encrypting and decryp
 
 <br>
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm install data-crypt
@@ -65,7 +65,7 @@ yarn add data-crypt
 
 <br>
 
-## 🕓 Quick Start
+## Quick Start
 
 ###  Encrypt and Decrypt Text
 
@@ -82,7 +82,7 @@ console.log('Decrypted:', decrypted); // 'Secret message'
 ```
 <br>
 
-## 🔳 CLI Usage
+## CLI Usage
 
 DataCrypt provides a convenient command-line interface for quick encryption/decryption operations.
 
@@ -167,9 +167,9 @@ cat file.txt | dc encrypt -f "password" > encrypted.txt
 
 <br>
 
-##  📄 API Reference
+## API Reference
 
-###  ⭐ `encrypt()`: Encrypts text or binary data.
+### ⭐ `encrypt()`: Encrypts text or binary data.
 
 **Syntax**
 ```ts
@@ -319,7 +319,7 @@ console.log('Cached keys: ', DataCrypt.getCacheSize());
 ```
 <br>
 
-## ⚙️ Custom Options
+## Custom Options
 
 Customize the key derivation process:
 
@@ -342,9 +342,9 @@ interface DeriveOptions {
 
 <br>
 
-## 🎯 Usage
+## Usage
 
-### 🌐 Browser Usage
+### Browser Usage
 
 #### With Bundlers (Webpack, Vite, etc.)
 
@@ -370,7 +370,7 @@ You can use the same API in a browser environment.
 </script>
 ```
 
-### 📦 Node.js Usage
+### Node.js Usage
 
 #### CommonJS
 
@@ -395,7 +395,7 @@ import { DataCrypt } from 'datacrypt';
 
 <br>
 
-## 🔒 Security Considerations
+## Security Considerations
 
 ### Best Practices
 1. **Use Strong Passwords**: The security depends on password strength.
@@ -426,7 +426,7 @@ For large files, consider streaming encryption in chunks (not currently supporte
 
 <br>
 
-## 💁‍♂️ Contributing
+## Contributing
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -435,6 +435,6 @@ For large files, consider streaming encryption in chunks (not currently supporte
 
 
 
-## 🛡️ License
+## License
 
 MIT © 2025 [[M B Parvez](https://www.mbparvez.me)]
