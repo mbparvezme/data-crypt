@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Crypt: A Javascript Library for Encrypting/decrypting Text and Files Using Password</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <header class="bg-white shadow-md py-4 px-8">
+        <div class="max-w-6xl mx-auto flex items-center">
+            <h1 class="text-xl font-bold me-auto">Data Crypt</h1>
+            <a class="text-gray-500" href="https://github.com/mbparvezme/data-crypt/issues" target="_blank">Report issue</a>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-4xl mx-auto px-8 pt-16 pb-24">
+        <div id="content" class="prose max-w-full"></div>
+    </main>
+
+    <footer class="bg-white shadow-inner p-4 text-center text-gray-500 text-sm">
+        © 2025 Data Crypt | <a href="https://github.com/mbparvezme/data-crypt" target="_blank">GitHub Repo</a>
+    </footer>
+
+    <script>
+        let applyMarkdownStyles = () => {
+            const content = document.getElementById('content');
+            if (!content) return;
+            // Headings
+            content.querySelectorAll('h1').forEach(el => el.classList.add('text-4xl', 'font-bold', 'mb-4'));
+            content.querySelectorAll('h2').forEach(el => el.classList.add('text-2xl', 'font-semibold', 'mb-3'));
+            content.querySelectorAll('h3').forEach(el => el.classList.add('text-xl', 'font-semibold', 'mb-2'));
+            // Paragraphs
+            content.querySelectorAll('p').forEach(el => el.classList.add('text-gray-700', 'leading-relaxed', 'mb-3'));
+            // Lists
+            content.querySelectorAll('ul').forEach(el => el.classList.add('ps-4', 'mb-4'));
+            content.querySelectorAll('ol').forEach(el => el.classList.add('ps-4', 'mb-4'));
+            content.querySelectorAll('li').forEach(el => el.classList.add('mb-1', 'ml-5', 'list-disc'));
+            // Code blocks
+            content.querySelectorAll('pre').forEach(el => el.classList.add('bg-gray-900', 'text-white', 'p-4', 'rounded', 'overflow-x-auto', 'mb-4', 'whitespace-pre'));
+            content.querySelectorAll('code').forEach(el => el.classList.add('rounded', 'text-md', 'font-mono'));
+            // Tables
+            content.querySelectorAll('table').forEach(el => el.classList.add('border-collapse', 'border', 'border-gray-300', 'mb-4'));
+            content.querySelectorAll('th, td').forEach(el => el.classList.add('border', 'border-gray-300', 'p-2'));
+            // Links
+            content.querySelectorAll('a').forEach(el => el.classList.add('text-blue-600', 'hover:underline'));
+        }
+        async function loadPage() {
+            const mdFile = "../README.md"
+            try {
+                const response = await fetch(mdFile)
+                if (!response.ok) throw new Error('File not found')
+                const text = await response.text()
+                document.getElementById('content').innerHTML = marked.parse(text)
+                applyMarkdownStyles()
+            } catch (err) {
+                document.getElementById('content').innerHTML = `<p class="text-red-600">Error loading page: ${err.message}</p>`
+            }
+        }
+
+        loadPage('intro')
+    </script>
+</body>
+
+</html>

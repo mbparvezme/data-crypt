@@ -4,6 +4,40 @@ A robust, cross-platform TypeScript/JavaScript library for encrypting and decryp
 
 <br>
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+  - [Encrypt and Decrypt Text](#encrypt-and-decrypt-text)
+  - [CLI Usage](#cli-usage)
+    - [CLI Installation](#cli-installation)
+    - [Help](#help)
+    - [Available Commands](#available-commands)
+    - [Basic CLI Text Operations](#basic-cli-text-operations)
+    - [CLI File Operations](#cli-file-operations)
+    - [Advanced CLI Options](#advanced-cli-options)
+    - [Examples with Advanced Options](#examples-with-advanced-options)
+    - [Piping Support](#piping-support)
+- [API Reference](#api-reference)
+- [Custom Options](#custom-options)
+- [Usage](#usage)
+  - [Browser Usage](#browser-usage)
+    - [With Bundlers (Webpack, Vite, etc.)](#with-bundlers-webpack-vite-etc)
+    - [Direct Script Tag](#direct-script-tag)
+  - [Node.js Usage](#nodejs-usage)
+    - [CommonJS](#commonjs)
+    - [ES Modules](#es-modules)
+- [Security Considerations](#security-considerations)
+  - [Best Practices](#best-practices)
+  - [Default Security Parameters](#default-security-parameters)
+  - [Performance](#performance)
+  - [Limitations](#limitations)
+- [Contributing](#contributing)
+- [License](#license)
+
+<br>
+
 ## 🚀 Features
 
 * Secure Encryption: AES-GCM with PBKDF2 key derivation
@@ -362,7 +396,6 @@ import { DataCrypt } from 'datacrypt';
 <br>
 
 ## 🔒 Security Considerations
-
 
 ### Best Practices
 1. **Use Strong Passwords**: The security depends on password strength.
