@@ -1,6 +1,6 @@
 {
   "name": "data-crypt",
-  "version": "1.0.0",
+  "version": "1.0.0-rc1",
   "description": "A lightweight and powerful encryption library for Node.js and browser. It allows you to encrypt and decrypt text or files using a password.",
   "type": "module",
   "bin": {
