@@ -49,7 +49,7 @@
             content.querySelectorAll('a').forEach(el => el.classList.add('text-blue-600', 'hover:underline'));
         }
         async function loadPage() {
-            const mdFile = "README.md"
+            const mdFile = "https://raw.githubusercontent.com/mbparvezme/data-crypt/main/README.md"
             try {
                 const response = await fetch(mdFile)
                 if (!response.ok) throw new Error('File not found')
