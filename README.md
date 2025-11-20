@@ -496,7 +496,7 @@ You can use the same API in a browser environment.
 
 ```html
 <script type="module">
-  import { DataCrypt } from 'https://cdn.skypack.dev/data-cryp';
+  import { DataCrypt } from 'https://cdn.skypack.dev/data-crypt';
 
   const text = 'Hello from Browser!';
   const password = 'browser-key';
