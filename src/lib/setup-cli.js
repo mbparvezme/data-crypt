@@ -2,11 +2,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
-// Helper to handle __dirname in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Helper to handle __DIRNAME in ESM
+const __FILENAME = fileURLToPath(import.meta.url);
+const __DIRNAME = path.dirname(__FILENAME);
 
-const cliPath = path.join(__dirname, '..', 'cli.ts');
+const cliPath = path.join(__DIRNAME, '..', 'cli.ts');
 
 try {
   if (fs.existsSync(cliPath)) {

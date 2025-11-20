@@ -209,7 +209,6 @@ async function main() {
                         console.log(`✅ File decrypted and saved to: ${options.output}`);
                     }
                     else {
-                        // Try to decode as text, otherwise show as base64
                         try {
                             const text = new TextDecoder().decode(decrypted);
                             console.log(text);

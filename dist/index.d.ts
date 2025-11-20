@@ -41,7 +41,7 @@ export declare class DataCrypt {
     /**
      * Checks if a string appears to be valid Base64 data.
      */
-    static isEncryptedData(data: string): boolean;
+    static isEncrypted(data: string): boolean;
     /**
      * Generates cryptographically secure random bytes.
      */
