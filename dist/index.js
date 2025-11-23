@@ -1,189 +1,180 @@
-const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
-let subtle;
-let getRandomValues;
-if (isNode) {
-    try {
-        const { webcrypto } = await import("crypto");
-        subtle = webcrypto.subtle;
-        getRandomValues = webcrypto.getRandomValues.bind(webcrypto);
-    }
-    catch (error) {
-        throw new Error('Node.js crypto module not available');
-    }
-}
-else {
-    if (!crypto?.subtle || !crypto?.getRandomValues) {
-        throw new Error('Web Crypto API not available in this environment');
-    }
-    subtle = crypto.subtle;
-    getRandomValues = crypto.getRandomValues.bind(crypto);
-}
-const enc = new TextEncoder();
-const dec = new TextDecoder();
 export class DataCrypt {
-    static keyCache = new Map();
     static DEFAULT_ITERATIONS = 600000;
+    static DEFAULT_HASH = 'SHA-256';
+    static DEFAULT_KEY_LENGTH = 256;
     static DEFAULT_SALT_LENGTH = 16;
-    static DEFAULT_IV_LENGTH = 12;
-    static getCacheKey(password, salt, opts) {
-        return `${password}-${Buffer.from(salt).toString('base64')}-${JSON.stringify(opts)}`;
-    }
-    static validatePassword(password) {
-        if (!password || password.length === 0) {
-            throw new Error('Password cannot be empty');
-        }
-    }
-    static validateData(data) {
-        if (!data || (typeof data === 'string' && data.length === 0) ||
-            (data instanceof Uint8Array && data.length === 0)) {
-            throw new Error('Data cannot be empty');
-        }
-    }
+    static IV_LENGTH = 12; // 96 bits standard for GCM
+    static keyCache = new Map();
+    static CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
     /**
-     * Derives a cryptographic key from a password using PBKDF2
-     * @param password - Password for key derivation
-     * @param salt - Salt for key derivation
-     * @param opts - Key derivation options
-     * @returns Derived CryptoKey
+     * Encrypts a string or binary data.
+     * Returns a Base64 encoded string containing Salt + IV + Ciphertext.
      */
-    static async deriveKey(password, salt, { iterations = this.DEFAULT_ITERATIONS, hash = 'SHA-256', length = 256 } = {}) {
-        this.validatePassword(password);
-        const cacheKey = this.getCacheKey(password, salt, { iterations, hash, length });
-        if (this.keyCache.has(cacheKey)) {
-            return this.keyCache.get(cacheKey);
+    static async encrypt(data, password, opts = {}) {
+        const alg = 'AES-GCM';
+        let encodedData;
+        if (typeof data === 'string') {
+            encodedData = new TextEncoder().encode(data);
         }
-        const keyMaterial = await subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
-        const key = await subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations, hash }, keyMaterial, { name: 'AES-GCM', length }, false, ['encrypt', 'decrypt']);
-        this.keyCache.set(cacheKey, key);
-        return key;
-    }
-    /**
-     * Encrypts data using AES-GCM with key derived from password via PBKDF2
-     * @param text - Data to encrypt (string or Uint8Array)
-     * @param password - Password for key derivation
-     * @param opts - Key derivation options
-     * @returns Base64-encoded encrypted data (salt + iv + ciphertext)
-     * @throws {Error} When password or data is empty
-     */
-    static async encrypt(text, password, opts = {}) {
-        this.validatePassword(password);
-        this.validateData(text);
-        const saltLength = opts.saltLength || this.DEFAULT_SALT_LENGTH;
-        const salt = getRandomValues(new Uint8Array(saltLength));
-        const iv = getRandomValues(new Uint8Array(this.DEFAULT_IV_LENGTH));
+        else {
+            encodedData = data;
+        }
+        const saltLength = opts.saltLength ?? this.DEFAULT_SALT_LENGTH;
+        const salt = this.generateRandomBytes(saltLength);
+        const iv = this.generateRandomBytes(this.IV_LENGTH);
         const key = await this.deriveKey(password, salt, opts);
-        const data = typeof text === 'string' ? enc.encode(text) : text;
-        const encrypted = await subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, new Uint8Array(data));
-        const buffer = new Uint8Array(encrypted);
-        const combined = new Uint8Array(salt.length + iv.length + buffer.length);
-        combined.set(salt);
-        combined.set(iv, salt.length);
-        combined.set(buffer, salt.length + iv.length);
-        return Buffer.from(combined).toString('base64');
+        const ciphertextBuffer = await crypto.subtle.encrypt({ name: alg, iv }, key, encodedData);
+        const ciphertext = new Uint8Array(ciphertextBuffer);
+        const packed = new Uint8Array(salt.length + iv.length + ciphertext.length);
+        packed.set(salt, 0);
+        packed.set(iv, salt.length);
+        packed.set(ciphertext, salt.length + iv.length);
+        return this.toBase64(packed);
     }
     /**
-     * Decrypts data encrypted with the encrypt method
-     * @param base64 - Base64-encoded encrypted data
-     * @param password - Password used for encryption
-     * @param opts - Key derivation options (must match encryption options)
-     * @returns Decrypted string or null if decryption fails
+     * Decrypts a Base64 encoded string.
+     * Returns the original string or Uint8Array based on detection, or null on failure.
      */
     static async decrypt(base64, password, opts = {}) {
         try {
-            this.validatePassword(password);
-            if (!base64 || base64.length === 0) {
+            const alg = 'AES-GCM';
+            const packed = this.fromBase64(base64);
+            const saltLength = opts.saltLength ?? this.DEFAULT_SALT_LENGTH;
+            if (packed.length < saltLength + this.IV_LENGTH)
                 return null;
-            }
-            const combined = new Uint8Array(Buffer.from(base64, 'base64'));
-            if (combined.length < 28) { // Minimum: salt(16) + iv(12) = 28
-                return null;
-            }
-            const saltLength = opts.saltLength || this.DEFAULT_SALT_LENGTH;
-            const salt = combined.slice(0, saltLength);
-            const iv = combined.slice(saltLength, saltLength + this.DEFAULT_IV_LENGTH);
-            const data = combined.slice(saltLength + this.DEFAULT_IV_LENGTH);
+            const salt = packed.slice(0, saltLength);
+            const iv = packed.slice(saltLength, saltLength + this.IV_LENGTH);
+            const ciphertext = packed.slice(saltLength + this.IV_LENGTH);
             const key = await this.deriveKey(password, salt, opts);
-            const decrypted = await subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
-            return dec.decode(decrypted);
+            const decryptedBuffer = await crypto.subtle.decrypt({ name: alg, iv }, key, ciphertext);
+            const decryptedBytes = new Uint8Array(decryptedBuffer);
+            // 4. Attempt to decode as UTF-8 string, fallback to binary if invalid characters
+            // check if bytes look like valid UTF-8
+            try {
+                const decoded = new TextDecoder('utf-8', { fatal: true }).decode(decryptedBytes);
+                return decoded;
+            }
+            catch {
+                return decryptedBytes;
+            }
         }
-        catch {
+        catch (e) {
             return null;
         }
     }
     /**
-     * Encrypts file data (Uint8Array) using AES-GCM
-     * @param fileData - File data to encrypt
-     * @param password - Password for key derivation
-     * @param opts - Key derivation options
-     * @returns Base64-encoded encrypted file data
-     * @throws {Error} When password or file data is empty
+     * Encrypts binary file data. Returns Base64 string.
+     * Wrapper for encrypt() to strictly handle Uint8Array input.
      */
-    static async encryptFile(fileData, password, opts = {}) {
-        return await this.encrypt(fileData, password, opts);
+    static async encryptFile(fileData, password, opts) {
+        return this.encrypt(fileData, password, opts);
     }
     /**
-     * Decrypts file data encrypted with encryptFile method
-     * @param base64 - Base64-encoded encrypted file data
-     * @param password - Password used for encryption
-     * @param opts - Key derivation options (must match encryption options)
-     * @returns Decrypted file data as Uint8Array or null if decryption fails
+     * Decrypts to binary file data.
+     * Forces return type to Uint8Array even if it looks like text.
      */
-    static async decryptFile(base64, password, opts = {}) {
-        try {
-            this.validatePassword(password);
-            if (!base64 || base64.length === 0) {
-                return null;
-            }
-            const combined = new Uint8Array(Buffer.from(base64, 'base64'));
-            if (combined.length < 28) {
-                return null;
-            }
-            const saltLength = opts.saltLength || this.DEFAULT_SALT_LENGTH;
-            const salt = combined.slice(0, saltLength);
-            const iv = combined.slice(saltLength, saltLength + this.DEFAULT_IV_LENGTH);
-            const data = combined.slice(saltLength + this.DEFAULT_IV_LENGTH);
-            const key = await this.deriveKey(password, salt, opts);
-            const decrypted = await subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
-            return new Uint8Array(decrypted);
-        }
-        catch {
+    static async decryptFile(base64, password, opts) {
+        const result = await this.decrypt(base64, password, opts);
+        if (result === null)
             return null;
+        if (typeof result === 'string') {
+            return new TextEncoder().encode(result);
         }
+        return result;
     }
     /**
-     * Checks if a string appears to be valid encrypted data
-     * @param data - Base64 string to check
-     * @returns True if data has minimum structure of encrypted data
+     * Checks if a string appears to be valid Base64 data.
      */
-    static isEncryptedData(data) {
-        try {
-            const combined = new Uint8Array(Buffer.from(data, 'base64'));
-            return combined.length >= 28; // Minimum valid encrypted data length
-        }
-        catch {
+    static isEncrypted(data) {
+        if (!data || data.length % 4 !== 0)
             return false;
-        }
+        const regex = /^[A-Za-z0-9+/]*={0,2}$/;
+        return regex.test(data);
     }
     /**
-     * Generates cryptographically secure random bytes
-     * @param length - Number of random bytes to generate
-     * @returns Uint8Array with random bytes
+     * Generates cryptographically secure random bytes.
      */
     static generateRandomBytes(length) {
-        return getRandomValues(new Uint8Array(length));
+        const array = new Uint8Array(length);
+        crypto.getRandomValues(array);
+        return array;
     }
     /**
-     * Clears the derived key cache
+     * Clears the derived key cache.
      */
     static clearCache() {
         this.keyCache.clear();
     }
     /**
-     * Gets the number of cached keys
-     * @returns Number of cached keys
+     * Returns current cache size.
      */
     static getCacheSize() {
+        this.cleanCache(); // Remove expired cache
         return this.keyCache.size;
     }
+    // --- Private Helpers ---
+    static async deriveKey(password, salt, opts) {
+        const iterations = opts.iterations ?? this.DEFAULT_ITERATIONS;
+        const hash = opts.hash ?? this.DEFAULT_HASH;
+        const keyLen = opts.length ?? this.DEFAULT_KEY_LENGTH;
+        // Generate Cache Key
+        const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('');
+        const cacheId = `${hash}:${iterations}:${keyLen}:${saltHex}:${password}`;
+        // Check Cache
+        this.cleanCache();
+        const cached = this.keyCache.get(cacheId);
+        if (cached)
+            return cached.key;
+        // Import Password
+        const passwordBuffer = new TextEncoder().encode(password);
+        const importedKey = await crypto.subtle.importKey('raw', passwordBuffer, { name: 'PBKDF2' }, false, ['deriveBits', 'deriveKey']);
+        // Derive Key
+        const derivedKey = await crypto.subtle.deriveKey({
+            name: 'PBKDF2',
+            salt: salt,
+            iterations: iterations,
+            hash: hash,
+        }, importedKey, { name: 'AES-GCM', length: keyLen }, false, // non-exportable
+        ['encrypt', 'decrypt']);
+        // Save to Cache
+        this.keyCache.set(cacheId, {
+            key: derivedKey,
+            timestamp: Date.now()
+        });
+        return derivedKey;
+    }
+    static cleanCache() {
+        const now = Date.now();
+        for (const [id, entry] of this.keyCache) {
+            if (now - entry.timestamp > this.CACHE_TTL_MS) {
+                this.keyCache.delete(id);
+            }
+        }
+    }
+    // Universal Base64 Helper (Node + Browser)
+    static toBase64(bytes) {
+        if (typeof globalThis.Buffer !== 'undefined') {
+            return globalThis.Buffer.from(bytes).toString('base64');
+        }
+        // Browser fallback
+        let binary = '';
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return globalThis.btoa(binary);
+    }
+    static fromBase64(base64) {
+        if (typeof globalThis.Buffer !== 'undefined') {
+            return new Uint8Array(globalThis.Buffer.from(base64, 'base64'));
+        }
+        // Browser fallback
+        const binary = globalThis.atob(base64);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+    }
 }
-//# sourceMappingURL=index.js.map

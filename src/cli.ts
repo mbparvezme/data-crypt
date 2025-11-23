@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { DataCrypt } from './index.js';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { argv, stdin, exit } from 'process';
@@ -56,7 +57,7 @@ ${color('yellow', 'EXAMPLES:')}
   ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('white', '"text"')} ${color('magenta', '-i 500000 -l 256')} ${color('white', '"password"')}
 
 ${color('gray', '┌' + '─'.repeat(60) + '┐')}
-${color('gray', '│')} ${bold(color('gray', '💎 Tip'))} ${color('gray', '                                                    │')}
+${color('gray', '│')} ${bold(color('gray', '💎 Tip'))} ${color('gray', '                                                      │')}
 ${color('gray', '│')} ${color('gray', 'Use quotes around text/passwords with spaces!')} ${color('gray', '             │')}
 ${color('gray', '│')} ${color('gray', 'For more, visit: ')} ${color('white', 'https://github.com/mbparvezme/data-crypt')} ${color('gray', '│')}
 ${color('gray', '└' + '─'.repeat(60) + '┘')}
@@ -64,7 +65,7 @@ ${color('gray', '└' + '─'.repeat(60) + '┘')}
 `);
 }
 
-// Color utility function (add this at the top of your file)
+// Color utility function
 function color(colorName: string, text: string): string {
   const colors: { [key: string]: string } = {
     reset: '\x1b[0m',
@@ -100,7 +101,7 @@ function parseArgs(): CLIOptions {
   // Parse command and arguments
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    
+
     switch (arg) {
       case 'encrypt':
       case 'decrypt':
@@ -111,37 +112,37 @@ function parseArgs(): CLIOptions {
           options.password = args[++i];
         }
         break;
-        
+
       case '-f':
       case '--file':
         options.file = true;
         options.input = args[++i];
         break;
-        
+
       case '-o':
       case '--output':
         options.output = args[++i];
         break;
-        
+
       case '-i':
       case '--iterations':
         options.iterations = parseInt(args[++i]);
         break;
-        
+
       case '--hash':
         options.hash = args[++i];
         break;
-        
+
       case '-l':
       case '--length':
         options.length = parseInt(args[++i]) as any;
         break;
-        
+
       case '-s':
       case '--salt-length':
         options.saltLength = parseInt(args[++i]);
         break;
-        
+
       case '-p':
       case '--password':
         options.password = args[++i];
@@ -165,7 +166,7 @@ async function encryptData(text: string, password: string, opts?: any): Promise<
   return await DataCrypt.encrypt(text, password, opts);
 }
 
-async function decryptData(encrypted: string, password: string, opts?: any): Promise<string | null> {
+async function decryptData(encrypted: string, password: string, opts?: any): Promise<string | Uint8Array | null> {
   return await DataCrypt.decrypt(encrypted, password, opts);
 }
 
@@ -244,7 +245,6 @@ async function main() {
             writeFileSync(options.output, decrypted);
             console.log(`✅ File decrypted and saved to: ${options.output}`);
           } else {
-            // Try to decode as text, otherwise show as base64
             try {
               const text = new TextDecoder().decode(decrypted);
               console.log(text);

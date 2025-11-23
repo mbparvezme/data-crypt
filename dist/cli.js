@@ -42,15 +42,14 @@ ${color('yellow', 'EXAMPLES:')}
   ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('white', '"text"')} ${color('magenta', '-i 500000 -l 256')} ${color('white', '"password"')}
 
 ${color('gray', '┌' + '─'.repeat(60) + '┐')}
-${color('gray', '│')} ${bold(color('gray', '💎 Tip'))} ${color('gray', '                                                    │')}
+${color('gray', '│')} ${bold(color('gray', '💎 Tip'))} ${color('gray', '                                                      │')}
 ${color('gray', '│')} ${color('gray', 'Use quotes around text/passwords with spaces!')} ${color('gray', '             │')}
 ${color('gray', '│')} ${color('gray', 'For more, visit: ')} ${color('white', 'https://github.com/mbparvezme/data-crypt')} ${color('gray', '│')}
 ${color('gray', '└' + '─'.repeat(60) + '┘')}
 
-
 `);
 }
-// Color utility function (add this at the top of your file)
+// Color utility function
 function color(colorName, text) {
     const colors = {
         reset: '\x1b[0m',
@@ -210,7 +209,6 @@ async function main() {
                         console.log(`✅ File decrypted and saved to: ${options.output}`);
                     }
                     else {
-                        // Try to decode as text, otherwise show as base64
                         try {
                             const text = new TextDecoder().decode(decrypted);
                             console.log(text);
@@ -268,4 +266,3 @@ async function main() {
 }
 // Run the CLI
 main().catch(console.error);
-//# sourceMappingURL=cli.js.map

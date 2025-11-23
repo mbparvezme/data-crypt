@@ -1,4 +1,4 @@
-# 🔐 Data-Cryp
+# 🔐 DataCrypt
 
 A robust, cross-platform TypeScript/JavaScript library for encrypting and decrypting data and files using AES-GCM with PBKDF2 key derivation. Works seamlessly in both Node.js and browser environments with built-in CLI support.
 
@@ -135,10 +135,10 @@ dc decrypt -f encrypted.txt -o decrypted.txt "password"
 
 | Option	|   Description   |   Example |
 | :------------ | :-------------- | :---------- |
-| -i, --iterations &lt;number&gt; | PBKDF2 iterations | -i 1000000 |
-| --hash &lt;algorithm&gt; | Hash algorithm (SHA-256, SHA-384, SHA-512) | --hash SHA-512 |
-| -l, --length &lt;bits&gt; | Hash algorithm (SHA-256, SHA-384, SHA-512) | --hash SHA-512 |
-| -s, --salt-length &lt;bytes&gt; | Salt length in bytes | -s 32 |
+| -i, --iterations &lt;number&gt; | PBKDF2 iterations | `-i 1000000` |
+| --hash &lt;algorithm&gt; | Hash algorithm (SHA-256, SHA-384, SHA-512) | `--hash SHA-512` |
+| -l, --length &lt;bits&gt; | Key length in bits (`128`, `192`, `256`) | `--hash SHA-512` |
+| -s, --salt-length &lt;bytes&gt; | Salt length in bytes | `-s 32` |
 
 
 ### Examples with Advanced Options
@@ -252,7 +252,7 @@ decryptFile(
 ```
 
 **Parameters**
-- `fileData`: Uint8Array containing file data
+- `base64`: Uint8Array containing file data
 - `password`: Password used for encryption
 - `opts`: [Optional derivation options](#custom-options) (must match encryption options)
 
@@ -264,16 +264,16 @@ const decryptedFile = await DataCrypt.decryptFile(encryptedFile, 'password');
 ```
 <br>
 
-### ⭐ `isEncryptedData()`: Checks if a string appears to be valid encrypted data.
+### ⭐ `isEncrypted()`: Checks if a string appears to be valid encrypted data.
 
 **Syntax**
 ```ts
-isEncryptedData(data: string): boolean
+isEncrypted(data: string): boolean
 ```
 
 **Example**
 ```ts
-const isValid = DataCrypt.isEncryptedData(encryptedData);
+const isValid = DataCrypt.isEncrypted(encryptedData);
 console.log('Is encrypted?', isValid); // true or false
 ```
 <br>
@@ -347,7 +347,7 @@ interface DeriveOptions {
 #### With Bundlers (Webpack, Vite, etc.)
 
 ```ts
-import { DataCrypt } from 'datacrypt';
+import { DataCrypt } from 'data-crypt';
 // NOw use as normal Javascript
 ```
 
@@ -356,13 +356,13 @@ You can use the same API in a browser environment.
 
 ```html
 <script type="module">
-  import { DataCryp } from 'https://cdn.skypack.dev/data-cryp';
+  import { DataCrypt } from 'https://cdn.skypack.dev/data-cryp';
 
   const text = 'Hello from Browser!';
   const password = 'browser-key';
 
-  const encrypted = await DataCryp.encrypt(text, password);
-  const decrypted = await DataCryp.decrypt(encrypted, password);
+  const encrypted = await DataCrypt.encrypt(text, password);
+  const decrypted = await DataCrypt.decrypt(encrypted, password);
 
   console.log({ encrypted, decrypted });
 </script>
@@ -373,7 +373,7 @@ You can use the same API in a browser environment.
 #### CommonJS
 
 ```js
-const { DataCrypt } = require('datacrypt');
+const { DataCrypt } = require('data-crypt');
 
 async function main() {
   const encrypted = await DataCrypt.encrypt('Node.js data', 'password');
@@ -387,7 +387,7 @@ main().catch(console.error);
 #### ES Modules
 
 ```js
-import { DataCrypt } from 'datacrypt';
+import { DataCrypt } from 'data-crypt';
 // Use as shown in browser examples
 ```
 

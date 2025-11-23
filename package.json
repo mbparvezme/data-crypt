@@ -1,15 +1,10 @@
 {
   "name": "data-crypt",
-  "version": "1.0.0-rc1",
+  "version": "1.0.0-rc2",
   "description": "A lightweight and powerful encryption library for Node.js and browser. It allows you to encrypt and decrypt text or files using a password.",
   "type": "module",
-  "bin": {
-    "datacrypt": "./dist/cli.js",
-    "data-crypt": "./dist/cli.js",
-    "dc": "./dist/cli.js"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -17,31 +12,25 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "bin": {
+    "dc": "./dist/cli.js",
+    "datacrypt": "./dist/cli.js",
+    "data-crypt": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && node src/lib/setup-cli.js",
-
-    "build:docs": "cp README.md docs/ && npm run build",
-    "deploy:docs": "cp README.md docs/ && git add docs/README.md && git commit -m 'Update docs' && git push",
-
-    "test": "ts-node-esm test/index.test.ts",
+    "build": "tsc && npm run setup-bin",
+    "setup-bin": "node ./src/lib/setup-cli.js",
     "prepublishOnly": "npm run build",
-    "clean": "rm -rf dist",
-    "dev:cli": "node --loader tsx src/cli.ts"
+    "test": "tsx ./test/index.test.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mbparvezme/data-crypt.git"
   },
-  "bugs": {
-    "url": "https://github.com/mbparvezme/data-crypt/issues"
-  },
-  "homepage": "https://github.com/mbparvezme/data-crypt#readme",
-  "license": "MIT",
-  "author": "M B Parvez",
   "keywords": [
     "aes",
     "encryption",
@@ -56,15 +45,18 @@
     "webcrypto",
     "typescript"
   ],
-  "engines": {
-    "node": ">=16.0.0"
+  "author": "M B Parvez",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mbparvezme/data-crypt/issues"
   },
+  "homepage": "https://github.com/mbparvezme/data-crypt#readme",
   "devDependencies": {
-    "typescript": "^5.7.2",
-    "@types/node": "^22.9.0",
-    "ts-node": "^10.9.2"
+    "@types/node": "^20.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.0.0"
   },
-  "dependencies": {
-    "tslib": "^2.8.1"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

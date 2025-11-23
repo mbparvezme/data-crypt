@@ -1,3 +1,7 @@
+/**
+ * DataCrypt - A zero-dependency, cross-platform encryption library.
+ * Uses AES-GCM for encryption and PBKDF2 for key derivation.
+ */
 export type HashAlgorithm = 'SHA-256' | 'SHA-384' | 'SHA-512';
 export type KeyLength = 128 | 192 | 256;
 export interface DeriveOptions {
@@ -7,75 +11,51 @@ export interface DeriveOptions {
     saltLength?: number;
 }
 export declare class DataCrypt {
-    private static keyCache;
     private static readonly DEFAULT_ITERATIONS;
+    private static readonly DEFAULT_HASH;
+    private static readonly DEFAULT_KEY_LENGTH;
     private static readonly DEFAULT_SALT_LENGTH;
-    private static readonly DEFAULT_IV_LENGTH;
-    private static getCacheKey;
-    private static validatePassword;
-    private static validateData;
+    private static readonly IV_LENGTH;
+    private static keyCache;
+    private static readonly CACHE_TTL_MS;
     /**
-     * Derives a cryptographic key from a password using PBKDF2
-     * @param password - Password for key derivation
-     * @param salt - Salt for key derivation
-     * @param opts - Key derivation options
-     * @returns Derived CryptoKey
+     * Encrypts a string or binary data.
+     * Returns a Base64 encoded string containing Salt + IV + Ciphertext.
      */
-    static deriveKey(password: string, salt: Uint8Array, { iterations, hash, length }?: DeriveOptions): Promise<CryptoKey>;
+    static encrypt(data: string | Uint8Array, password: string, opts?: DeriveOptions): Promise<string>;
     /**
-     * Encrypts data using AES-GCM with key derived from password via PBKDF2
-     * @param text - Data to encrypt (string or Uint8Array)
-     * @param password - Password for key derivation
-     * @param opts - Key derivation options
-     * @returns Base64-encoded encrypted data (salt + iv + ciphertext)
-     * @throws {Error} When password or data is empty
+     * Decrypts a Base64 encoded string.
+     * Returns the original string or Uint8Array based on detection, or null on failure.
      */
-    static encrypt(text: string | Uint8Array, password: string, opts?: DeriveOptions): Promise<string>;
+    static decrypt(base64: string, password: string, opts?: DeriveOptions): Promise<string | Uint8Array | null>;
     /**
-     * Decrypts data encrypted with the encrypt method
-     * @param base64 - Base64-encoded encrypted data
-     * @param password - Password used for encryption
-     * @param opts - Key derivation options (must match encryption options)
-     * @returns Decrypted string or null if decryption fails
-     */
-    static decrypt(base64: string, password: string, opts?: DeriveOptions): Promise<string | null>;
-    /**
-     * Encrypts file data (Uint8Array) using AES-GCM
-     * @param fileData - File data to encrypt
-     * @param password - Password for key derivation
-     * @param opts - Key derivation options
-     * @returns Base64-encoded encrypted file data
-     * @throws {Error} When password or file data is empty
+     * Encrypts binary file data. Returns Base64 string.
+     * Wrapper for encrypt() to strictly handle Uint8Array input.
      */
     static encryptFile(fileData: Uint8Array, password: string, opts?: DeriveOptions): Promise<string>;
     /**
-     * Decrypts file data encrypted with encryptFile method
-     * @param base64 - Base64-encoded encrypted file data
-     * @param password - Password used for encryption
-     * @param opts - Key derivation options (must match encryption options)
-     * @returns Decrypted file data as Uint8Array or null if decryption fails
+     * Decrypts to binary file data.
+     * Forces return type to Uint8Array even if it looks like text.
      */
     static decryptFile(base64: string, password: string, opts?: DeriveOptions): Promise<Uint8Array | null>;
     /**
-     * Checks if a string appears to be valid encrypted data
-     * @param data - Base64 string to check
-     * @returns True if data has minimum structure of encrypted data
+     * Checks if a string appears to be valid Base64 data.
      */
-    static isEncryptedData(data: string): boolean;
+    static isEncrypted(data: string): boolean;
     /**
-     * Generates cryptographically secure random bytes
-     * @param length - Number of random bytes to generate
-     * @returns Uint8Array with random bytes
+     * Generates cryptographically secure random bytes.
      */
     static generateRandomBytes(length: number): Uint8Array;
     /**
-     * Clears the derived key cache
+     * Clears the derived key cache.
      */
     static clearCache(): void;
     /**
-     * Gets the number of cached keys
-     * @returns Number of cached keys
+     * Returns current cache size.
      */
     static getCacheSize(): number;
+    private static deriveKey;
+    private static cleanCache;
+    private static toBase64;
+    private static fromBase64;
 }
-//# sourceMappingURL=index.d.ts.map
