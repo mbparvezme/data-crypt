@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { DataCrypt } from './index.js';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { argv, stdin, exit } from 'process';
+import * as path from 'path';
 function showHelp() {
     console.log(`
 ${color('blue', '='.repeat(60))}
@@ -19,37 +20,24 @@ ${color('yellow', 'FILE OPERATIONS:')}
   ${color('magenta', '-f, --file')} ${color('white', '<path>')}              ${color('gray', '# Input file path')}
   ${color('magenta', '-o, --output')} ${color('white', '<path>')}            ${color('gray', '# Output file path')}
 
-${color('yellow', 'ADVANCED OPTIONS:')}
-  ${color('magenta', '-i, --iterations')} ${color('white', '<number>')}      ${color('gray', '# PBKDF2 iterations')} ${color('gray', '(default: 600,000)')}
-  ${color('magenta', '--hash')} ${color('white', '<algorithm>')}             ${color('gray', '# Hash algorithm:')} ${color('cyan', 'SHA-256, SHA-384, SHA-512')}
-  ${color('magenta', '-l, --length')} ${color('white', '<bits>')}            ${color('gray', '# Key length:')} ${color('cyan', '128, 192, 256')}
-  ${color('magenta', '-s, --salt-length')} ${color('white', '<bytes>')}      ${color('gray', '# Salt length')} ${color('gray', '(default: 16)')}
+${color('yellow', 'NEW FEATURES:')}
+  ${color('magenta', '-z, --compress')}               ${color('gray', '# Compress data before encrypting (GZIP)')}
+  ${color('magenta', '--html')}                       ${color('gray', '# Generate self-decrypting HTML file')}
 
-${color('yellow', 'GENERAL:')}
-  ${color('magenta', '-h, --help')}                     ${color('gray', '# Show this help message')}
+${color('yellow', 'ADVANCED OPTIONS:')}
+  ${color('magenta', '-i, --iterations')} ${color('white', '<number>')}      ${color('gray', '# PBKDF2 iterations')}
+  ${color('magenta', '--hash')} ${color('white', '<algorithm>')}             ${color('gray', '# SHA-256, SHA-384, SHA-512')}
+  ${color('magenta', '-l, --length')} ${color('white', '<bits>')}            ${color('gray', '# 128, 192, 256')}
 
 ${color('yellow', 'EXAMPLES:')}
-  ${color('gray', '# Text encryption/decryption')}
-  ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('white', '"secret text"')} ${color('magenta', '"password"')}
-  ${color('cyan', '→')} ${color('green', 'dc decrypt')} ${color('white', '"ENCRYPTED_BASE64"')} ${color('magenta', '"password"')}
+  ${color('gray', '# Compress and encrypt a large file')}
+  ${color('green', 'dc encrypt')} ${color('magenta', '-f large.log -o large.enc -z')} ${color('white', '"password"')}
 
-  ${color('gray', '# File encryption/decryption')}
-  ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('magenta', '-f input.txt -o encrypted.txt')} ${color('white', '"password"')}
-  ${color('cyan', '→')} ${color('green', 'dc decrypt')} ${color('magenta', '-f encrypted.txt -o decrypted.txt')} ${color('white', '"password"')}
-
-  ${color('gray', '# With advanced options')}
-  ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('magenta', '-f document.pdf -o secure.pdf -i 1000000 --hash SHA-512')} ${color('white', '"password"')}
-  ${color('cyan', '→')} ${color('green', 'dc encrypt')} ${color('white', '"text"')} ${color('magenta', '-i 500000 -l 256')} ${color('white', '"password"')}
-
-${color('gray', '┌' + '─'.repeat(60) + '┐')}
-${color('gray', '│')} ${bold(color('gray', '💎 Tip'))} ${color('gray', '                                                      │')}
-${color('gray', '│')} ${color('gray', 'Use quotes around text/passwords with spaces!')} ${color('gray', '             │')}
-${color('gray', '│')} ${color('gray', 'For more, visit: ')} ${color('white', 'https://github.com/mbparvezme/data-crypt')} ${color('gray', '│')}
-${color('gray', '└' + '─'.repeat(60) + '┘')}
+  ${color('gray', '# Create a self-decrypting HTML file for a friend')}
+  ${color('green', 'dc encrypt')} ${color('magenta', '-f secret.pdf -o secret.html --html')} ${color('white', '"password"')}
 
 `);
 }
-// Color utility function
 function color(colorName, text) {
     const colors = {
         reset: '\x1b[0m',
@@ -60,10 +48,8 @@ function color(colorName, text) {
         cyan: '\x1b[36m',
         white: '\x1b[37m',
         gray: '\x1b[90m',
-        brightWhite: '\x1b[97m'
     };
-    const colorCode = colors[colorName] || colors.reset;
-    return `${colorCode}${text}${colors.reset}`;
+    return `${colors[colorName] || colors.reset}${text}${colors.reset}`;
 }
 const bold = (text) => `\x1b[1m${text}\x1b[0m`;
 function parseArgs() {
@@ -72,22 +58,21 @@ function parseArgs() {
         operation: 'encrypt',
         file: false
     };
-    // First, check for help
     if (args.includes('-h') || args.includes('--help')) {
         options.help = true;
         return options;
     }
-    // Parse command and arguments
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
         switch (arg) {
             case 'encrypt':
             case 'decrypt':
                 options.operation = arg;
-                // Next arguments should be text and password (for simple usage)
-                if (!options.file && args[i + 2] && !args[i + 2].startsWith('-')) {
+                if (!options.file && args[i + 1] && !args[i + 1].startsWith('-')) {
                     options.input = args[++i];
-                    options.password = args[++i];
+                    if (args[i + 1] && !args[i + 1].startsWith('-')) {
+                        options.password = args[++i];
+                    }
                 }
                 break;
             case '-f':
@@ -118,6 +103,14 @@ function parseArgs() {
             case '--password':
                 options.password = args[++i];
                 break;
+            // New Flags
+            case '-z':
+            case '--compress':
+                options.compress = true;
+                break;
+            case '--html':
+                options.html = true;
+                break;
         }
     }
     return options;
@@ -130,26 +123,6 @@ function readStdin() {
         stdin.on('end', () => resolve(data.trim()));
     });
 }
-async function encryptData(text, password, opts) {
-    return await DataCrypt.encrypt(text, password, opts);
-}
-async function decryptData(encrypted, password, opts) {
-    return await DataCrypt.decrypt(encrypted, password, opts);
-}
-async function encryptFile(filePath, password, opts) {
-    if (!existsSync(filePath)) {
-        throw new Error(`File not found: ${filePath}`);
-    }
-    const fileData = readFileSync(filePath);
-    return await DataCrypt.encryptFile(new Uint8Array(fileData), password, opts);
-}
-async function decryptFile(filePath, password, opts) {
-    if (!existsSync(filePath)) {
-        throw new Error(`File not found: ${filePath}`);
-    }
-    const encryptedData = readFileSync(filePath, 'utf8');
-    return await DataCrypt.decryptFile(encryptedData, password, opts);
-}
 async function main() {
     const options = parseArgs();
     if (options.help || argv.length <= 2) {
@@ -161,57 +134,76 @@ async function main() {
         if (!password) {
             const lastArg = argv[argv.length - 1];
             if (lastArg && !lastArg.startsWith('-') && lastArg !== 'encrypt' && lastArg !== 'decrypt') {
-                password = lastArg;
+                // Fallback: If input is set, but password isn't, and the last arg wasn't consumed as input
+                if (options.input !== lastArg) {
+                    password = lastArg;
+                }
             }
         }
         if (!password) {
             console.error('Error: Password is required');
-            console.error('Example: dc encrypt "text" "password"');
-            console.error('Example: dc encrypt -f file.txt "password"');
             exit(1);
         }
-        // Get input
         let input = options.input;
         if (!input && !stdin.isTTY && !options.file) {
             input = await readStdin();
         }
-        // Build options object
-        const cryptoOpts = {};
-        if (options.iterations)
-            cryptoOpts.iterations = options.iterations;
-        if (options.hash)
-            cryptoOpts.hash = options.hash;
-        if (options.length)
-            cryptoOpts.length = options.length;
-        if (options.saltLength)
-            cryptoOpts.saltLength = options.saltLength;
+        // Build crypto options with strict typing
+        const cryptoOpts = {
+            iterations: options.iterations,
+            hash: options.hash,
+            length: options.length,
+            saltLength: options.saltLength,
+            compress: options.compress
+        };
         if (options.file) {
-            // File operations
             if (!input) {
-                console.error('Error: Input file path required with -f/--file');
+                console.error('Error: Input file path required with -f');
                 exit(1);
             }
+            const fileBuffer = readFileSync(input);
+            const fileBytes = new Uint8Array(fileBuffer);
             if (options.operation === 'encrypt') {
-                const encrypted = await encryptFile(input, password, cryptoOpts);
-                if (options.output) {
-                    writeFileSync(options.output, encrypted);
-                    console.log(`✅ File encrypted and saved to: ${options.output}`);
+                // --- Encryption Flow ---
+                const encrypted = await DataCrypt.encryptFile(fileBytes, password, cryptoOpts);
+                if (options.html) {
+                    // GENERATE HTML
+                    const filename = path.basename(input);
+                    const htmlContent = DataCrypt.generateSelfDecryptingHTML(encrypted, filename, cryptoOpts);
+                    if (options.output) {
+                        writeFileSync(options.output, htmlContent);
+                        console.log(`✅ Self-decrypting HTML saved to: ${options.output}`);
+                    }
+                    else {
+                        console.log(htmlContent);
+                    }
                 }
                 else {
-                    console.log(encrypted);
+                    // STANDARD OUTPUT
+                    if (options.output) {
+                        writeFileSync(options.output, encrypted);
+                        const action = options.compress ? 'Compressed & Encrypted' : 'Encrypted';
+                        console.log(`✅ File ${action} and saved to: ${options.output}`);
+                    }
+                    else {
+                        console.log(encrypted);
+                    }
                 }
             }
             else {
-                const decrypted = await decryptFile(input, password, cryptoOpts);
+                // --- Decryption Flow ---
+                // For decryption, read the file as string (Base64)
+                const encryptedData = new TextDecoder().decode(fileBytes);
+                const decrypted = await DataCrypt.decryptFile(encryptedData, password, cryptoOpts);
                 if (decrypted) {
                     if (options.output) {
                         writeFileSync(options.output, decrypted);
                         console.log(`✅ File decrypted and saved to: ${options.output}`);
                     }
                     else {
+                        // Try UTF-8
                         try {
-                            const text = new TextDecoder().decode(decrypted);
-                            console.log(text);
+                            console.log(new TextDecoder().decode(decrypted));
                         }
                         catch {
                             console.log(Buffer.from(decrypted).toString('base64'));
@@ -219,41 +211,47 @@ async function main() {
                     }
                 }
                 else {
-                    console.error('❌ Decryption failed - wrong password or corrupted data');
+                    console.error('❌ Decryption failed');
                     exit(1);
                 }
             }
         }
         else {
-            // Text operations
+            // Text Operations
             if (!input) {
-                console.error('Error: No input text provided');
-                console.error('Example: dc encrypt "your text" "password"');
+                console.error('Error: No input text');
                 exit(1);
             }
             if (options.operation === 'encrypt') {
-                const encrypted = await encryptData(input, password, cryptoOpts);
-                if (options.output) {
-                    writeFileSync(options.output, encrypted);
-                    console.log(`✅ Text encrypted and saved to: ${options.output}`);
+                const encrypted = await DataCrypt.encrypt(input, password, cryptoOpts);
+                if (options.html) {
+                    const htmlContent = DataCrypt.generateSelfDecryptingHTML(encrypted, 'secret-message.txt', cryptoOpts);
+                    if (options.output)
+                        writeFileSync(options.output, htmlContent);
+                    else
+                        console.log(htmlContent);
                 }
                 else {
-                    console.log(encrypted);
+                    if (options.output)
+                        writeFileSync(options.output, encrypted);
+                    else
+                        console.log(encrypted);
                 }
             }
             else {
-                const decrypted = await decryptData(input, password, cryptoOpts);
+                const decrypted = await DataCrypt.decrypt(input, password, cryptoOpts);
                 if (decrypted) {
                     if (options.output) {
-                        writeFileSync(options.output, decrypted);
-                        console.log(`✅ Text decrypted and saved to: ${options.output}`);
+                        // Determine if binary or string
+                        const outData = typeof decrypted === 'string' ? decrypted : Buffer.from(decrypted);
+                        writeFileSync(options.output, outData);
                     }
                     else {
-                        console.log(decrypted);
+                        console.log(typeof decrypted === 'string' ? decrypted : Buffer.from(decrypted).toString('utf-8'));
                     }
                 }
                 else {
-                    console.error('❌ Decryption failed - wrong password or corrupted data');
+                    console.error('❌ Decryption failed');
                     exit(1);
                 }
             }
@@ -264,5 +262,4 @@ async function main() {
         exit(1);
     }
 }
-// Run the CLI
 main().catch(console.error);

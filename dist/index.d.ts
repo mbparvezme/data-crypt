@@ -9,6 +9,7 @@ export interface DeriveOptions {
     hash?: HashAlgorithm;
     length?: KeyLength;
     saltLength?: number;
+    compress?: boolean;
 }
 export declare class DataCrypt {
     private static readonly DEFAULT_ITERATIONS;
@@ -25,35 +26,18 @@ export declare class DataCrypt {
     static encrypt(data: string | Uint8Array, password: string, opts?: DeriveOptions): Promise<string>;
     /**
      * Decrypts a Base64 encoded string.
-     * Returns the original string or Uint8Array based on detection, or null on failure.
      */
     static decrypt(base64: string, password: string, opts?: DeriveOptions): Promise<string | Uint8Array | null>;
-    /**
-     * Encrypts binary file data. Returns Base64 string.
-     * Wrapper for encrypt() to strictly handle Uint8Array input.
-     */
     static encryptFile(fileData: Uint8Array, password: string, opts?: DeriveOptions): Promise<string>;
-    /**
-     * Decrypts to binary file data.
-     * Forces return type to Uint8Array even if it looks like text.
-     */
     static decryptFile(base64: string, password: string, opts?: DeriveOptions): Promise<Uint8Array | null>;
-    /**
-     * Checks if a string appears to be valid Base64 data.
-     */
+    static generateSelfDecryptingHTML(encryptedBase64: string, filename?: string, opts?: DeriveOptions): string;
+    static downloadFile(content: string | Uint8Array, filename: string, mimeType?: string): void;
     static isEncrypted(data: string): boolean;
-    /**
-     * Generates cryptographically secure random bytes.
-     */
     static generateRandomBytes(length: number): Uint8Array;
-    /**
-     * Clears the derived key cache.
-     */
     static clearCache(): void;
-    /**
-     * Returns current cache size.
-     */
     static getCacheSize(): number;
+    private static compressData;
+    private static decompressData;
     private static deriveKey;
     private static cleanCache;
     private static toBase64;
