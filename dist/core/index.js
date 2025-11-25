@@ -1,5 +1,5 @@
 import { CONSTANTS } from './constants.js';
-import { generateRandomBytes, toBase64, fromBase64, isEncryptedData, KeyCache, triggerBrowserDownload } from './utils.js';
+import { generateRandomBytes, toBase64, fromBase64, isEncrypted, KeyCache, triggerBrowserDownload } from './utils.js';
 import { compressData, decompressData, isGzipped } from './compression.js';
 import { generateHTMLTemplate } from './html.js';
 import { deriveKey, encryptRaw, decryptRaw } from './crypto.js';
@@ -80,7 +80,7 @@ export class DataCrypt {
         triggerBrowserDownload(content, filename, mimeType);
     }
     static isEncrypted(data) {
-        return isEncryptedData(data);
+        return isEncrypted(data);
     }
     static generateRandomBytes(length) {
         return generateRandomBytes(length);

@@ -1,6 +1,6 @@
 import { DeriveOptions } from './types.js';
 import { CONSTANTS } from './constants.js';
-import { generateRandomBytes, toBase64, fromBase64, isEncryptedData, KeyCache, triggerBrowserDownload } from './utils.js';
+import { generateRandomBytes, toBase64, fromBase64, isEncrypted, KeyCache, triggerBrowserDownload } from './utils.js';
 import { compressData, decompressData, isGzipped } from './compression.js';
 import { generateHTMLTemplate } from './html.js';
 import { deriveKey, encryptRaw, decryptRaw } from './crypto.js';
@@ -104,7 +104,7 @@ export class DataCrypt {
   }
 
   static isEncrypted(data: string): boolean {
-    return isEncryptedData(data);
+    return isEncrypted(data);
   }
 
   static generateRandomBytes(length: number): Uint8Array {

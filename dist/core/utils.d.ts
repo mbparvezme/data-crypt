@@ -13,7 +13,7 @@ export declare const generateRandomBytes: (length: number) => Uint8Array;
 /**
  * Checks for Base64 format validity
  */
-export declare const isEncryptedData: (data: string) => boolean;
+export declare const isEncrypted: (data: string) => boolean;
 /**
  * Universal Base64 Encoder (Node/Browser)
  */
