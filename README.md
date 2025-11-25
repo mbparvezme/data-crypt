@@ -19,6 +19,8 @@ A robust, cross-platform TypeScript/JavaScript library for encrypting and decryp
   - [Examples with Advanced Options](#examples-with-advanced-options)
   - [Piping Support](#piping-support)
 - [API Reference](#api-reference)
+  - [Piping Support](#piping-support)
+- [Compressing Data](#compressing-data)
 - [Custom Options](#custom-options)
 - [Usage](#usage)
   - [Browser Usage](#browser-usage)
@@ -39,14 +41,16 @@ A robust, cross-platform TypeScript/JavaScript library for encrypting and decryp
 
 ## Features
 
-* Secure Encryption: AES-GCM with PBKDF2 key derivation
-* Built-in CLI support
-* Cross-Platform: Works in Node.js and browsers
-* Zero Dependencies: Uses native Web Crypto API
-* Type Safe: Written in TypeScript with full type definitions
-* Configurable: Customizable encryption parameters
-* File Support: Encrypt/decrypt binary file data
-* Simple API: Easy-to-use static methods
+* **Secure Encryption**: AES-GCM with PBKDF2 key derivation
+* **Built-in CLI**: Command-line interface for encrypting/decrypting files
+* **Cross-Platform**: Works in Node.js and modern browsers
+* **Zero Dependencies**: Uses native Web Crypto API
+* **Type Safe**: Written in TypeScript with full type definitions
+* **Compression Support**: Built-in GZIP compression to reduce file size
+* **Self-Decrypting HTML**: Generate standalone HTML files unlockable in any browser
+* **Configurable**: Customizable encryption parameters
+* **File Support**: Encrypt/decrypt binary file data
+* **Simple API**: Easy-to-use static methods
 
 <br>
 
@@ -135,10 +139,12 @@ dc decrypt -f encrypted.txt -o decrypted.txt "password"
 
 | Option	|   Description   |   Example |
 | :------------ | :-------------- | :---------- |
-| -i, --iterations &lt;number&gt; | PBKDF2 iterations | `-i 1000000` |
-| --hash &lt;algorithm&gt; | Hash algorithm (SHA-256, SHA-384, SHA-512) | `--hash SHA-512` |
-| -l, --length &lt;bits&gt; | Key length in bits (`128`, `192`, `256`) | `--hash SHA-512` |
-| -s, --salt-length &lt;bytes&gt; | Salt length in bytes | `-s 32` |
+| `-i, --iterations <number>` | PBKDF2 iterations | `-i 1000000` |
+| `--hash <algorithm>` | Hash algorithm (SHA-256, SHA-384, SHA-512) | `--hash SHA-512` |
+| `-l, --length <bits>` | Key length in bits (`128`, `192`, `256`) | `--hash SHA-512` |
+| `-s, --salt-length <bytes>` | Salt length in bytes | `-s 32` |
+| `-z, --compress` | Compress data (GZIP) before encryption | `-z` |
+| `--html` | Generate a self-decrypting HTML file | `--html` |
 
 
 ### Examples with Advanced Options
@@ -150,6 +156,41 @@ dc encrypt "text" -i 1000000 --hash SHA-512 "password"
 # Encrypt file with advanced options
 dc encrypt -f document.pdf -o secure.pdf -i 500000 --hash SHA-384 "password"
 ```
+
+### Self-Decrypting HTML Files
+
+Create a standalone `.html` file that anyone can decrypt in their browser without installing any software.
+
+```bash
+# Encrypt file into a self-unlocking HTML page
+dc encrypt -f secret.pdf -o unlock.html --html "password"
+```
+
+> **⚠️ Important Note for Chrome/Edge Users:**
+>
+> Modern browsers like Chrome and Edge restrict the Web Crypto API on `file://` URLs for security reasons. If you double-click the generated HTML file to open it, decryption might fail.
+>
+> **Solutions:**
+> 1. Open the file in **Firefox** (it works locally).
+> 2. Use a local server (e.g., `npx serve .`).
+> 3. Upload the file to any website (HTTPS) or localhost.
+
+### Compression
+
+Reduce file size by compressing data before encryption (uses GZIP).
+
+```bash
+# Compress and encrypt a large log file
+dc encrypt -f server.log -o server.enc -z "password"
+```
+
+### Decompression
+
+When decrypting files that were compressed using the `-z` flag, **decompression is automatic**. You do not need to pass a compression flag during decryption. DataCrypt detects the compression headers inside the encrypted data and handles it for you.
+
+```bash
+# Just run the standard decrypt command
+dc decrypt -f server.enc -o server.log "password"
 
 ### Piping Support
 
@@ -278,6 +319,58 @@ console.log('Is encrypted?', isValid); // true or false
 ```
 <br>
 
+### ⭐ `generateSelfDecryptingHTML()`: Generates a standalone HTML string containing the encrypted data and a decryption script.
+
+**Syntax**
+```ts
+generateSelfDecryptingHTML(
+  encryptedBase64: string, 
+  filename: string, 
+  opts?: DeriveOptions
+): string
+```
+
+**Example**
+```ts
+const html = DataCrypt.generateSelfDecryptingHTML(encryptedData, 'doc.pdf');
+```
+
+**Parameters**
+- `encryptedBase64`: The Base64 string returned by `encrypt()` or `encryptFile()`.
+- `filename`: The default filename used when the user downloads the decrypted file (e.g., '`secret.pdf`').
+- `opts`: [Optional derivation options](#custom-options) (must match encryption options)
+
+> [!NOTE]
+> If you used custom options (like specific iterations) to encrypt, you must pass them here so the HTML file uses the correct parameters to derive the key.
+
+**Returns**: A string containing the full HTML document.
+
+<br>
+
+### ⭐ `downloadFile()`: **[Browser Only]** Triggers an immediate file download in the browser. Useful for saving generated HTML files or decrypted binary data.
+
+**Syntax**
+```ts
+downloadFile(
+  content: string | Uint8Array,
+  filename: string,
+  mimeType: string = 'application/octet-stream'
+): void
+```
+
+**Example**
+```js
+const html = DataCrypt.generateSelfDecryptingHTML(encryptedData, 'doc.pdf');
+DataCrypt.downloadFile(html, 'secret.html', 'text/html');
+```
+
+**Parameters**
+- `content`: The data to download (string or binary).
+- `filename`: The name of the file to save (e.g., '`secret.html`').
+- `mimeType`: (Optional) The MIME type (default: `'application/octet-stream'`).
+
+<br>
+
 ### ⭐ `generateRandomBytes()`: Generates cryptographically secure random bytes.
 
 **Syntax**
@@ -317,6 +410,50 @@ console.log('Cached keys: ', DataCrypt.getCacheSize());
 ```
 <br>
 
+## Compression & Decompression
+
+DataCrypt includes built-in GZIP compression to reduce the size of your encrypted data. This is especially useful for large text files, logs, or JSON data.
+
+### 1. Compressing Data
+When you enable compression, the data is first compressed using GZIP and then encrypted. This results in significantly smaller output files for compressible data.
+
+**CLI Usage**
+
+Use the `-z` or `--compress` flag during encryption:
+
+```bash
+# Encrypt and compress a large log file
+dc encrypt -f app.log -o app.log.enc -z "password"
+```
+
+**API Usage**
+
+Pass `{ compress: true }` in the options object:
+
+```js
+const bigData = JSON.stringify(largeObject);
+const encrypted = await DataCrypt.encrypt(bigData, 'password', { compress: true });
+```
+
+### 1. Decompressing Data
+Decompression is automatic. You do not need to specify any special flags or options when decrypting. DataCrypt automatically detects the GZIP compression headers inside the encrypted payload and decompresses the data transparently.
+
+**CLI Usage**
+
+```bash
+# Just run the standard command; DataCrypt handles the rest
+dc decrypt -f app.log.enc -o restored.log "password"
+```
+
+**API Usage**
+
+```js
+// No options needed; automatic detection
+const decrypted = await DataCrypt.decrypt(encrypted, 'password');
+```
+
+<br>
+
 ## Custom Options
 
 Customize the key derivation process:
@@ -327,6 +464,7 @@ Customize the key derivation process:
 | `hash`        | `HashAlgorithm` | `'SHA-256'` | Hash algorithm for PBKDF2                                 |
 | `length`      | `KeyLength`     | `256`       | Key length in bits (128 / 192 / 256)                      |
 | `saltLength`  | `number`        | `16`        | Salt length in bytes (default: 16)                        |
+| `compress`    | `boolean`       | `false`     | Enable GZIP compression before encryption                 |
 
 **Interface**
 ```ts
@@ -335,6 +473,7 @@ interface DeriveOptions {
   hash?: HashAlgorithm;
   length?: KeyLength;
   saltLength?: number;
+  compress?: boolean;
 }
 ```
 
