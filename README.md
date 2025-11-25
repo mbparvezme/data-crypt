@@ -191,6 +191,7 @@ When decrypting files that were compressed using the `-z` flag, **decompression 
 ```bash
 # Just run the standard decrypt command
 dc decrypt -f server.enc -o server.log "password"
+```
 
 ### Piping Support
 
