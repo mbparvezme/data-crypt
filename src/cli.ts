@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-
-import { DataCrypt, HashAlgorithm, KeyLength, DeriveOptions } from './index.js';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { DataCrypt, DeriveOptions } from './index.js';
+import { readFileSync, writeFileSync } from 'fs';
 import { argv, stdin, exit } from 'process';
 import * as path from 'path';
 
@@ -12,8 +11,8 @@ interface CLIOptions {
   password?: string;
   file?: boolean;
   iterations?: number;
-  hash?: HashAlgorithm;
-  length?: KeyLength;
+  hash?: DeriveOptions['hash'];
+  length?: DeriveOptions['length'];
   saltLength?: number;
   compress?: boolean;
   html?: boolean;
@@ -104,8 +103,8 @@ function parseArgs(): CLIOptions {
       case '-f': case '--file': options.file = true; options.input = args[++i]; break;
       case '-o': case '--output': options.output = args[++i]; break;
       case '-i': case '--iterations': options.iterations = parseInt(args[++i]); break;
-      case '--hash': options.hash = args[++i] as HashAlgorithm; break; 
-      case '-l': case '--length': options.length = parseInt(args[++i]) as KeyLength; break; 
+      case '--hash': options.hash = args[++i] as DeriveOptions['hash']; break; 
+      case '-l': case '--length': options.length = parseInt(args[++i]) as DeriveOptions['length']; break; 
       case '-s': case '--salt-length': options.saltLength = parseInt(args[++i]); break;
       case '-p': case '--password': options.password = args[++i]; break;
       

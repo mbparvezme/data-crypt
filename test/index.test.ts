@@ -1,4 +1,4 @@
-import { DataCrypt, type DeriveOptions } from "../src/index";
+import { DataCrypt, type DeriveOptions } from "../src/index.js";
 
 async function runTests() {
   const password = "test-password";
