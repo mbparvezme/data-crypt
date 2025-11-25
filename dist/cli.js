@@ -164,7 +164,6 @@ async function main() {
             const fileBuffer = readFileSync(input);
             const fileBytes = new Uint8Array(fileBuffer);
             if (options.operation === 'encrypt') {
-                // --- Encryption Flow ---
                 const encrypted = await DataCrypt.encryptFile(fileBytes, password, cryptoOpts);
                 if (options.html) {
                     // GENERATE HTML
