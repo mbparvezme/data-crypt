@@ -1,5 +1,5 @@
 import { DeriveOptions } from './types.js';
-export { DeriveOptions, HashAlgorithm, KeyLength } from './types.js';
+export { type DeriveOptions, type HashAlgorithm, type KeyLength } from './types.js';
 /**
  * DataCrypt Facade
  * Orchestrates Config, Utils, Compression, and Crypto modules.

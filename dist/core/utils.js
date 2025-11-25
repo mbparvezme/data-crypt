@@ -35,7 +35,7 @@ export const generateRandomBytes = (length) => {
 /**
  * Checks for Base64 format validity
  */
-export const isEncryptedData = (data) => {
+export const isEncrypted = (data) => {
     if (!data || data.length % 4 !== 0)
         return false;
     const regex = /^[A-Za-z0-9+/]*={0,2}$/;
